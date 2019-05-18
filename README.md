@@ -9,9 +9,12 @@
 Subway sandwish ordering plafrom
 
 ##Instruction
-pull project
-import db subway.sql
+ - pull project
+ - import db subway.sql
 run
+```cmd
+composer install
+```
 ```cmd
 yii serve
 ```
