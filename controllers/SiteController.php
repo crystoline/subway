@@ -2,6 +2,13 @@
 
 namespace app\controllers;
 
+use app\models\Customer;
+use app\models\Meal;
+use app\models\OptionType;
+use app\models\Order;
+use app\models\OrderDetail;
+use RecursiveArrayIterator;
+use RecursiveIteratorIterator;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -20,7 +27,7 @@ class SiteController extends Controller
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'only' => ['logout'],
                 'rules' => [
                     [
@@ -31,7 +38,7 @@ class SiteController extends Controller
                 ],
             ],
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'logout' => ['post'],
                 ],
@@ -58,11 +65,87 @@ class SiteController extends Controller
     /**
      * Displays homepage.
      *
+     * @param string $code
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex($code = '')
     {
-        return $this->render('index');
+
+
+        $customer = Customer::find()->where(['code' => $code])->one();
+        $current_meal = Meal::find()->where(['status' => 1])->one();
+        $customer_previous_order = null;
+        $customer_order = null;
+        if ($customer) {
+
+
+            if ($current_meal && $customer) {
+                $customer_order = $customer->getOrders()->where(['meal_id' => $current_meal->id])->one();
+                $customer_previous_order = $customer->getOrders()->orderBy(['id' => SORT_DESC])->one();;
+                if ($data = Yii::$app->request->post()) {
+
+                    $option_ids = $it = new RecursiveIteratorIterator(new RecursiveArrayIterator($data['order_detail']));
+                    if ($customer_order) {
+                        $customer_order->location = @$data['location'];
+
+                    } else {
+                        $customer_order = new Order();
+                        $customer_order->location = @$data['location'] ?: '';
+                        $customer_order->customer_id = $customer->id;
+                        $customer_order->meal_id = $current_meal->id;
+                    }
+                    $customer_order->save();
+
+
+                    try {
+                        foreach ($customer_order->orderDetails as $orderDetail) {
+                            $orderDetail->delete();
+                        }
+                        foreach ($option_ids as $option_id) {
+                            $orderDetail = new OrderDetail();
+                            $orderDetail->order_id = $customer_order->id;
+                            $orderDetail->option_id = $option_id;
+                            $orderDetail->save();
+                        }
+                    } catch (\Exception $exception) {
+
+                    }
+                    $customer_order->refresh();
+
+                }
+
+
+            }
+
+
+        }
+
+
+        $option_types = OptionType::find()->orderBy(['sort' => SORT_ASC])->all();
+        // $current_meal->load([]);
+        return $this->render('index', [
+            'customer' => $customer,
+            'current_meal' => $current_meal,
+            'customer_order' => $customer_order,
+            'customer_previous_order' => $customer_previous_order,
+            'option_types' => $option_types
+        ]);
+
+    }
+
+
+    /**
+     * Displays homepage.
+     *
+     * @return string
+     */
+    public function actionOrders()
+    {
+        $current_meal = Meal::find()->where(['status' =>1])->one();
+        // $current_meal->load([]);
+        return $this->render('index', [
+            'current_meal' => $current_meal
+        ]);
     }
 
     /**
@@ -138,5 +221,12 @@ class SiteController extends Controller
                 echo 'good';
             }
         }
+    }
+
+    public function actionRate($order_id, $rating){
+        $order = Order::findOne($order_id);
+        $order->rating = $rating;
+        print  $order->save()? 1: 0;
+        return;
     }
 }

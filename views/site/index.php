@@ -1,53 +1,299 @@
 <?php
 
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+
 /* @var $this yii\web\View */
-
-$this->title = 'My Yii Application';
+/* @var $customer app\models\Customer */
+/* @var $current_meal app\models\Meal */
+/* @var $customer_order app\models\Order */
+/* @var $customer_previous_order app\models\Order */
+/* @var $previous_orders array */
+/* @var $option_types array */
+$model = $customer_order ?: $customer_previous_order
 ?>
-<div class="site-index">
 
-    <div class="jumbotron">
-        <h1>Congratulations!</h1>
+<?php if ($customer != null): ?>
+    <h3>Welcome! <?= $customer->name ?></h3>
+    <ul id="customer-tab" class="nav nav-tabs">
+        <li class="active"><a href="#new" data-toggle="tab">New Order</a></li>
+        <li><a href="#current" data-toggle="tab">Current Order</a></li>
+        <li><a href="#history" data-toggle="tab">History</a></li>
 
-        <p class="lead">You have successfully created your Yii-powered application.</p>
+    </ul>
+    <?php if ($current_meal): ?>
+        <div class="tab-content">
+            <div class="tab-pane active fade in" id="new">
+                <div class="row">
+                    <div class="col-md-4">
+                        <?php $form = ActiveForm::begin(); ?>
+                        <h3>Manage Order</h3>
+                        <input type="hidden" name="location" id="location">
+                        <?php
+                        /** @var \app\models\OptionType $option_types */
+                        //Check box', 'Drop down list
+                        foreach ($option_types as $option_type): ?>
 
-        <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
-    </div>
+                            <div class="form-group">
+                                <label> <?= $option_type->name ?> </label>
+                                <?php if ($option_type->type == 'Drop down list'): ?>
+                                    <?php if ($option_type->is_multiple): ?>
+                                        <select required name="order_detail[<?= $option_type->id ?>][]"
+                                                class="form-control"
+                                                multiple>
+                                            <option value="" selected class="text-grey">--SELECT--</option>
+                                            <?php foreach ($option_type->options as $option): ?>
+                                                <option value="<?= $option->id ?>" <?= $model && $model->hasOption($option->id) ? 'selected' : '' ?>><?= $option->value ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    <?php else: ?>
+                                        <select required name="order_detail[<?= $option_type->id ?>]"
+                                                class="form-control">
+                                            <option value="" selected class="text-grey">--SELECT--</option>
+                                            <?php foreach ($option_type->options as $option): ?>
+                                                <option value="<?= $option->id ?>" <?= $model && $model->hasOption($option->id) ? 'selected' : '' ?>><?= $option->value ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    <?php endif; ?>
+                                <?php elseif ($option_type->type == 'Check box'): ?>
+                                    <br>
+                                    <?php if ($option_type->is_multiple): ?>
+                                        <?php foreach ($option_type->options as $option): ?>
+                                            <label style="font-weight: normal">
+                                                <input type="checkbox" name="order_detail[<?= $option_type->id ?>][]"
+                                                       value="<?= $option->id ?>" <?= $model && $model->hasOption($option->id) ? 'checked' : '' ?>>
+                                                <?= $option->value ?>
+                                            </label> &nbsp;
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <?php foreach ($option_type->options as $option): ?>
+                                            <label style="font-weight: normal">
+                                                <input type="radio" name="order_detail[<?= $option_type->id ?>]"
+                                                       value="<?= $option->id ?>" <?= $model && $model->hasOption($option->id) ? 'checked' : '' ?>>
+                                                <?= $option->value ?>
+                                            </label> &nbsp;
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                <?php endif ?>
 
-    <div class="body-content">
+                            </div>
 
-        <div class="row">
-            <div class="col-lg-4">
-                <h2>Heading</h2>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
+                        <?php endforeach; ?>
+                        <div class="form-group">
+                            <?= Html::submitButton((!$customer_order) ? 'Save Order' : 'Update Order', ['class' => 'btn btn-success']) ?>
+                        </div>
 
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
+                        <?php ActiveForm::end(); ?>
+                    </div>
+                </div>
             </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
+            <div class="tab-pane fade in" id="current">
+                <div class="row">
+                    <?php if ($customer_order) : ?>
+                        <div class="col-md-4">
+                            <table class="table table-striped table->bordered">
+                                <caption><h3>Current Order</h3></caption>
+                                <?php foreach ($option_types as $option_type): ?>
+                                    <tr>
+                                        <td><b><?= $option_type->name ?></b></td>
+                                        <td>
+                                            <?php foreach ($customer_order->getOptions($option_type->id) as $option): ?>
+                                                <span class="label label-default"><?= $option->value ?></span> &nbsp;
+                                            <?php endforeach; ?>
+                                        </td>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
+                                    </tr>
+                                <?php endforeach; ?>
+                                <tr>
+                                    <td><b>Rating</b></td>
+                                    <td>
+                                        <?php if ($customer_order->rating): ?>
+                                        <?php else: ?>
+                                            Rate this meal
+                                        <?php endif ?>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
+            <div class="tab-pane fade in" id="history">
+                <div class="row">
+                    <div class="col-md-10">
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
+                        <table class="table table-striped">
+                            <caption><h3>Order History</h3></caption>
+                            <thead>
+                            <tr>
+                                <th>Date/time</th>
+                                <th>Location</th>
+                                <th>Orders</th>
+                                <th>Ratings</th>
+                            </tr>
+                            </thead>
 
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
+                            <?php if (!empty($customer->orders)): ?>
+                                <tbody>
+                                <?php foreach ($customer->orders as $i => $order): ?>
+                                    <tr>
+
+                                        <td><?= date('D jS M, y, g:h A', strtotime($order->date)) ?></td>
+                                        <td>
+                                            <?php if ($order->location): ?>
+                                                <?= $order->location ?>
+                                                <a target="_blank"
+                                                   href="https://www.google.com/maps/@<?= $order->location ?>,18z?hl=en"
+                                                   class="btn btn-sm btn-primary" title="view on map"> <i
+                                                            class="fa fa-map "> view</i></a>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php foreach ($order->orderDetails as $orderDetail):
+                                                if (!empty($orderDetail->option->value)): ?>
+                                                    <span class="badge badge-secondary"><?= $orderDetail->option->optionType->name . ': ' . $orderDetail->option->value ?></span>
+                                                <?php endif;
+                                            endforeach; ?>
+                                        </td>
+                                        <td>
+                                            <span id="history<?= $order->id ?>">
+
+                                                <?= $order->ratingHtml ?>
+                                                <?php if (!isset($order->rating)): ?>
+                                                    <button type='button' class="btn btn-sm btn-primary" onclick="rating('history<?= $order->id ?>', <?= $order->id ?>)">Rate this meal</button>
+                                                <?php endif ?>
+                                            </span>
+
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            <?php else: ?>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="3" style="text-align:center">No previous order</td>
+                                </tr>
+                                </tfoot>
+                            <?php endif; ?>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
-    </div>
-</div>
+
+    <?php else: ?>
+        <div class="alert alert-warning">There is no meal available</div>
+
+    <?php endif; ?>
+
+<?php else: ?>
+    <form class="row">
+        <fieldset>
+            <legend>Login to make an order</legend>
+            <div class="form-group col-md-4">
+                <input name="code" type="text" id="code" class="form-control" placeholder="Enter unique code here">
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary">Login</button>
+            </div>
+        </fieldset>
+
+    </form>
+    <?php if (Yii::$app->request->get('code')): ?>
+        <div class="alert alert-warning">User account was not found</div>
+    <?php endif; ?>
+<?php endif; ?>
+
+
+<script>
+    window.onload = function (ev) {
+        // $('#myTab a:first').tab('show')
+        var loc_display = $('#location_display');
+        var loc_input = $('#location');
+        var showPosition = function (position) {
+            loc_display.text("Lat: " + position.coords.latitude + ", Lon: " + position.coords.longitude);
+            loc_input.val(position.coords.latitude + "," + position.coords.longitude);
+        };
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            loc_display.text("Geolocation is not supported by this browser.");
+        }
+
+
+    };
+
+
+    function showPosition(position) {
+        x.innerHTML = "Latitude: " + position.coords.latitude +
+            "<br>Longitude: " + position.coords.longitude;
+    }
+
+    var  selected_feeling;
+
+    function rating(target, order_id) {
+        selected_feeling = null;
+        swal({
+            title: "",
+            text: '<p>How would you like to rate this meal?</p><span onclick="event.preventDefault();reply(\'sad\')" type="button" value="sad" class="btn feel">' +
+            '<i class="fa fa-frown fa-3x"></i></span><span onclick="event.preventDefault();reply(\'neutral\')" type="button" value="neutral" class="btn feel">' +
+            '<i class="fa fa-meh fa-3x"></i></span><span onclick="event.preventDefault();reply(\'happy\')" type="button" value="happy" class="btn feel">' +
+            '<i class="fa fa-smile fa-3x"></i></span><hr>',
+            icon: "info",
+            className: '',
+            closeOnClickOutside: false,
+            html: true,
+            buttons: {
+                confirm: {
+                    text: "Close",
+                    value: '',
+                    visible: true,
+                    className: "btn btn-default",
+                    closeModal: true
+                }
+            }
+        },function (value) {
+            var rating =  null;
+            var feeling_html =  '';
+
+            if (selected_feeling === 'sad') {
+                swal("Sorry!", {
+                    icon: "error",
+                    buttons: false
+                });
+                rating = 0;
+                feeling_html = '<span class="feel"><i class="fa fa-frown fa-3x"></i></span>';
+            } else if (selected_feeling === 'neutral') {
+                swal("Okay!", {
+                    icon: "warning",
+                    buttons: false
+                });
+                rating = 1;
+                feeling_html = '<span class="feel"><i class="fa fa-meh fa-3x"></i></span>';
+            } else if (selected_feeling === 'happy') {
+                swal("Hooray!", {
+                    icon: "success",
+                    buttons: false
+                });
+                rating = 2;
+                feeling_html = '<span class="feel"><i class="fa fa-smile fa-3x"></i></span>';
+            }
+
+            if(feeling_html){
+                fetch('/site/rate?rating='+rating+'&order_id='+order_id).then(function (respone) {
+                    console.log(respone);
+                    $('#'+target).html(feeling_html);
+                })
+            }
+        });
+    }
+
+    function reply(feel) {
+       alert(feel);
+        selected_feeling = feel;
+    }
+
+</script>

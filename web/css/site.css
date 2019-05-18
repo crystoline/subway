@@ -113,3 +113,10 @@ a.desc:after {
 .nav > li > form > button.logout:focus {
     outline: none;
 }
+
+.feel {
+    margin: 0px 10px;
+    background-color: white;
+    color: #aeaeae;
+    cursor: pointer;
+}

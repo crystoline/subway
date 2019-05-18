@@ -22,6 +22,8 @@ AppAsset::register($this);
     <?php $this->registerCsrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.min.css" />
 </head>
 <body>
 <?php $this->beginBody() ?>
@@ -35,15 +37,20 @@ AppAsset::register($this);
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
-    echo Nav::widget([
-        'options' => ['class' => 'navbar-nav navbar-right'],
-        'items' => [
-            ['label' => 'Home', 'url' => ['/site/index']],
-            ['label' => 'About', 'url' => ['/site/about']],
-            ['label' => 'Contact', 'url' => ['/site/contact']],
-            Yii::$app->user->isGuest ? (
+        if(  Yii::$app->user->isGuest ){
+            $urls = [
+                ['label' => 'Home', 'url' => ['/site/index']],
+                 //  ['label' => 'About', 'url' => ['/site/about']],
+          //  ['label' => 'Contact', 'url' => ['/site/contact']],
                 ['label' => 'Login', 'url' => ['/site/login']]
-            ) : (
+            ];
+        }else{
+            $urls = [
+                ['label' => 'Home', 'url' => ['/site/index']],
+                ['label' => 'Meals', 'url' => ['/meal/index']],
+                ['label' => 'Customers', 'url' => ['/customer/index']],
+                ['label' => 'Options', 'url' => ['/option/index']],
+                ['label' => 'Options Types', 'url' => ['/option-type/index']],
                 '<li>'
                 . Html::beginForm(['/site/logout'], 'post')
                 . Html::submitButton(
@@ -52,8 +59,13 @@ AppAsset::register($this);
                 )
                 . Html::endForm()
                 . '</li>'
-            )
-        ],
+            ];
+        }
+    
+
+    echo Nav::widget([
+        'options' => ['class' => 'navbar-nav navbar-right'],
+        'items' => $urls,
     ]);
     NavBar::end();
     ?>
@@ -69,13 +81,15 @@ AppAsset::register($this);
 
 <footer class="footer">
     <div class="container">
-        <p class="pull-left">&copy; My Company <?= date('Y') ?></p>
+        <p class="pull-left">&copy; Subway <?= date('Y') ?></p>
 
         <p class="pull-right"><?= Yii::powered() ?></p>
     </div>
 </footer>
 
 <?php $this->endBody() ?>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.min.js"></script>
 </body>
 </html>
 <?php $this->endPage() ?>
