@@ -10,6 +10,7 @@ use yii\widgets\ActiveForm;
 /* @var $customer_previous_order app\models\Order */
 /* @var $previous_orders array */
 /* @var $option_types array */
+/* @var $message string */
 $model = $customer_order ?: $customer_previous_order
 ?>
 
@@ -27,6 +28,14 @@ $model = $customer_order ?: $customer_previous_order
             <?php if ($current_meal): ?>
                 <div class="row">
                     <div class="col-md-4">
+                        <?php if(!empty($message)): ?>
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                <strong>Success!</strong> <?= $message ?>.
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        <?php endif ?>
                         <?php $form = ActiveForm::begin(); ?>
                         <h3>Manage Order</h3>
                         <input type="hidden" name="location" id="location">
@@ -99,6 +108,7 @@ $model = $customer_order ?: $customer_previous_order
             <div class="row">
                 <?php if ($customer_order) : ?>
                     <div class="col-md-4">
+
                         <table class="table table-striped table->bordered">
                             <caption><h3>Current Order</h3></caption>
                             <?php foreach ($option_types as $option_type): ?>

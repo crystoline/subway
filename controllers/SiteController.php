@@ -76,6 +76,7 @@ class SiteController extends Controller
         $current_meal = Meal::find()->where(['status' => 1])->one();
         $customer_previous_order = null;
         $customer_order = null;
+        $message = '';
         if ($customer) {
 
 
@@ -96,7 +97,7 @@ class SiteController extends Controller
                     }
                     $customer_order->save();
 
-
+                    $message = 'your order has been sent';
                     try {
                         foreach ($customer_order->orderDetails as $orderDetail) {
                             $orderDetail->delete();
@@ -128,7 +129,8 @@ class SiteController extends Controller
             'current_meal' => $current_meal,
             'customer_order' => $customer_order,
             'customer_previous_order' => $customer_previous_order,
-            'option_types' => $option_types
+            'option_types' => $option_types,
+            'message' => $message
         ]);
 
     }
