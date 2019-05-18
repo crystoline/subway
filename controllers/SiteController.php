@@ -210,11 +210,11 @@ class SiteController extends Controller
         return $this->render('about');
     }
     public function actionAddAdmin() {
-        $model = User::find()->where(['username' => 'crystoline'])->one();
+        $model = User::find()->where(['username' => 'admin'])->one();
         if (empty($model)) {
             $user = new User();
-            $user->username = 'crystoline';
-            $user->email = 'crystoline@gmail.com';
+            $user->username = 'admin';
+            $user->email = 'admin@admin.com';
             $user->setPassword('password');
             $user->generateAuthKey();
             if ($user->save()) {
