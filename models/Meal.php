@@ -13,6 +13,7 @@ use Yii;
  * @property string $location
  *
  * @property Order[] $orders
+ * @property string active
  */
 class Meal extends \yii\db\ActiveRecord
 {

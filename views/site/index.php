@@ -21,9 +21,10 @@ $model = $customer_order ?: $customer_previous_order
         <li><a href="#history" data-toggle="tab">History</a></li>
 
     </ul>
-    <?php if ($current_meal): ?>
-        <div class="tab-content">
-            <div class="tab-pane active fade in" id="new">
+
+    <div class="tab-content">
+        <div class="tab-pane active fade in" id="new">
+            <?php if ($current_meal): ?>
                 <div class="row">
                     <div class="col-md-4">
                         <?php $form = ActiveForm::begin(); ?>
@@ -87,106 +88,115 @@ $model = $customer_order ?: $customer_previous_order
                         <?php ActiveForm::end(); ?>
                     </div>
                 </div>
-            </div>
-            <div class="tab-pane fade in" id="current">
-                <div class="row">
-                    <?php if ($customer_order) : ?>
-                        <div class="col-md-4">
-                            <table class="table table-striped table->bordered">
-                                <caption><h3>Current Order</h3></caption>
-                                <?php foreach ($option_types as $option_type): ?>
-                                    <tr>
-                                        <td><b><?= $option_type->name ?></b></td>
-                                        <td>
-                                            <?php foreach ($customer_order->getOptions($option_type->id) as $option): ?>
-                                                <span class="label label-default"><?= $option->value ?></span> &nbsp;
-                                            <?php endforeach; ?>
-                                        </td>
+            <?php else: ?>
+                <p></p>
+                <div class="alert alert-warning">There is no meal available</div>
+            <?php endif; ?>
 
-                                    </tr>
-                                <?php endforeach; ?>
+        </div>
+
+        <div class="tab-pane fade in" id="current">
+            <div class="row">
+                <?php if ($customer_order) : ?>
+                    <div class="col-md-4">
+                        <table class="table table-striped table->bordered">
+                            <caption><h3>Current Order</h3></caption>
+                            <?php foreach ($option_types as $option_type): ?>
                                 <tr>
-                                    <td><b>Rating</b></td>
+                                    <td><b><?= $option_type->name ?></b></td>
                                     <td>
-                                        <?php if ($customer_order->rating): ?>
-                                        <?php else: ?>
-                                            Rate this meal
-                                        <?php endif ?>
+                                        <?php foreach ($customer_order->getOptions($option_type->id) as $option): ?>
+                                            <span class="label label-default"><?= $option->value ?></span> &nbsp;
+                                        <?php endforeach; ?>
                                     </td>
+
                                 </tr>
-                            </table>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <div class="tab-pane fade in" id="history">
-                <div class="row">
-                    <div class="col-md-10">
-
-                        <table class="table table-striped">
-                            <caption><h3>Order History</h3></caption>
-                            <thead>
+                            <?php endforeach; ?>
                             <tr>
-                                <th>Date/time</th>
-                                <th>Location</th>
-                                <th>Orders</th>
-                                <th>Ratings</th>
+                                <td><b>Rating</b></td>
+                                <td>
+                                     <span id="current-<?= $customer_order->id ?>">
+                                         <?= $customer_order->ratingHtml ?>
+                                         <?php if (!isset($customer_order->rating)): ?>
+                                             <button type='button' class="btn btn-sm btn-primary"
+                                                     onclick="rating('current-<?= $customer_order->id ?>', <?= $customer_order->id ?>)">Rate this meal</button>
+                                         <?php endif ?>
+                                     </span>
+                                </td>
                             </tr>
-                            </thead>
+                        </table>
+                    </div>
 
-                            <?php if (!empty($customer->orders)): ?>
-                                <tbody>
-                                <?php foreach ($customer->orders as $i => $order): ?>
-                                    <tr>
+                <?php else: ?>
+                    <p></p>
+                    <div class="alert alert-warning">You haven't ordered yet</div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="tab-pane fade in" id="history">
+            <div class="row">
+                <div class="col-md-10">
 
-                                        <td><?= date('D jS M, y, g:h A', strtotime($order->date)) ?></td>
-                                        <td>
-                                            <?php if ($order->location): ?>
-                                                <?= $order->location ?>
-                                                <a target="_blank"
-                                                   href="https://www.google.com/maps/@<?= $order->location ?>,18z?hl=en"
-                                                   class="btn btn-sm btn-primary" title="view on map"> <i
-                                                            class="fa fa-map "> view</i></a>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php foreach ($order->orderDetails as $orderDetail):
-                                                if (!empty($orderDetail->option->value)): ?>
-                                                    <span class="badge badge-secondary"><?= $orderDetail->option->optionType->name . ': ' . $orderDetail->option->value ?></span>
-                                                <?php endif;
-                                            endforeach; ?>
-                                        </td>
-                                        <td>
+                    <table class="table table-striped">
+                        <caption><h3>Order History</h3></caption>
+                        <thead>
+                        <tr>
+                            <th>Date/time</th>
+                            <th>Location</th>
+                            <th>Orders</th>
+                            <th>Ratings</th>
+                        </tr>
+                        </thead>
+
+                        <?php if (!empty($customer->orders)): ?>
+                            <tbody>
+                            <?php foreach ($customer->orders as $i => $order): ?>
+                                <tr>
+
+                                    <td><?= date('D jS M, y, g:h A', strtotime($order->date)) ?></td>
+                                    <td>
+                                        <?php if ($order->location): ?>
+                                            <?= $order->location ?>
+                                            <a target="_blank"
+                                               href="https://www.google.com/maps/@<?= $order->location ?>,18z?hl=en"
+                                               class="btn btn-sm btn-primary" title="view on map"> <i
+                                                        class="fa fa-map "> view</i></a>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php foreach ($order->orderDetails as $orderDetail):
+                                            if (!empty($orderDetail->option->value)): ?>
+                                                <span class="badge badge-secondary"><?= $orderDetail->option->optionType->name . ': ' . $orderDetail->option->value ?></span>
+                                            <?php endif;
+                                        endforeach; ?>
+                                    </td>
+                                    <td>
                                             <span id="history<?= $order->id ?>">
 
                                                 <?= $order->ratingHtml ?>
                                                 <?php if (!isset($order->rating)): ?>
-                                                    <button type='button' class="btn btn-sm btn-primary" onclick="rating('history<?= $order->id ?>', <?= $order->id ?>)">Rate this meal</button>
+                                                    <button type='button' class="btn btn-sm btn-primary"
+                                                            onclick="rating('history<?= $order->id ?>', <?= $order->id ?>)">Rate this meal</button>
                                                 <?php endif ?>
                                             </span>
 
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                                </tbody>
-                            <?php else: ?>
-                                <tfoot>
-                                <tr>
-                                    <td colspan="3" style="text-align:center">No previous order</td>
+                                    </td>
                                 </tr>
-                                </tfoot>
-                            <?php endif; ?>
-                        </table>
-                    </div>
+                            <?php endforeach; ?>
+                            </tbody>
+                        <?php else: ?>
+                            <tfoot>
+                            <tr>
+                                <td colspan="3" style="text-align:center">No previous order</td>
+                            </tr>
+                            </tfoot>
+                        <?php endif; ?>
+                    </table>
                 </div>
             </div>
         </div>
+    </div>
 
-
-    <?php else: ?>
-        <div class="alert alert-warning">There is no meal available</div>
-
-    <?php endif; ?>
 
 <?php else: ?>
     <form class="row">
@@ -201,7 +211,9 @@ $model = $customer_order ?: $customer_previous_order
         </fieldset>
 
     </form>
+
     <?php if (Yii::$app->request->get('code')): ?>
+        <p></p>
         <div class="alert alert-warning">User account was not found</div>
     <?php endif; ?>
 <?php endif; ?>
@@ -232,7 +244,7 @@ $model = $customer_order ?: $customer_previous_order
             "<br>Longitude: " + position.coords.longitude;
     }
 
-    var  selected_feeling;
+    var selected_feeling;
 
     function rating(target, order_id) {
         selected_feeling = null;
@@ -255,9 +267,9 @@ $model = $customer_order ?: $customer_previous_order
                     closeModal: true
                 }
             }
-        },function (value) {
-            var rating =  null;
-            var feeling_html =  '';
+        }, function (value) {
+            var rating = null;
+            var feeling_html = '';
 
             if (selected_feeling === 'sad') {
                 swal("Sorry!", {
@@ -282,17 +294,15 @@ $model = $customer_order ?: $customer_previous_order
                 feeling_html = '<span class="feel"><i class="fa fa-smile fa-3x"></i></span>';
             }
 
-            if(feeling_html){
-                fetch('/site/rate?rating='+rating+'&order_id='+order_id).then(function (respone) {
-                    console.log(respone);
-                    $('#'+target).html(feeling_html);
+            if (feeling_html) {
+                fetch('/site/rate?rating=' + rating + '&order_id=' + order_id).then(function (respone) {
+                    $('#' + target).html(feeling_html);
                 })
             }
         });
     }
 
     function reply(feel) {
-       alert(feel);
         selected_feeling = feel;
     }
 

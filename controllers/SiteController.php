@@ -143,8 +143,8 @@ class SiteController extends Controller
     {
         $current_meal = Meal::find()->where(['status' =>1])->one();
         // $current_meal->load([]);
-        return $this->render('index', [
-            'current_meal' => $current_meal
+        return $this->render('orders', [
+            'model' => $current_meal
         ]);
     }
 

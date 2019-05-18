@@ -42,11 +42,13 @@ AppAsset::register($this);
                 ['label' => 'Home', 'url' => ['/site/index']],
                  //  ['label' => 'About', 'url' => ['/site/about']],
           //  ['label' => 'Contact', 'url' => ['/site/contact']],
+                ['label' => 'Orders', 'url' => ['/site/orders']],
                 ['label' => 'Login', 'url' => ['/site/login']]
             ];
         }else{
             $urls = [
                 ['label' => 'Home', 'url' => ['/site/index']],
+                ['label' => 'Orders', 'url' => ['/site/orders']],
                 ['label' => 'Meals', 'url' => ['/meal/index']],
                 ['label' => 'Customers', 'url' => ['/customer/index']],
                 ['label' => 'Options', 'url' => ['/option/index']],

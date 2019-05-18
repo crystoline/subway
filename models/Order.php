@@ -113,11 +113,11 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getRatingHtml(){
         //var_dump($this->rating); die();
-        if($this->rating == 0) {
+        if($this->rating === '0') {
             return '<span class="feel"><i class="fa fa-frown fa-3x"></i></span>';
-        }else if($this->rating == 1) {
+        }else if($this->rating === '1') {
             return '<span class="feel"><i class="fa fa-meh fa-3x"></i></span>';
-        }else if($this->rating == 2){
+        }else if($this->rating === '2'){
             return '<span class="feel"><i class="fa fa-smile fa-3x"></i></span>';
         }
         return '';

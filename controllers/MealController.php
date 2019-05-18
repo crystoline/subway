@@ -14,6 +14,20 @@ use yii\filters\VerbFilter;
  */
 class MealController extends Controller
 {
+    private static function deactivateActiveMeals()
+    {
+        $data = Yii::$app->request->post();
+        if (!isset($data['status']) or $data['status'] != 0) {
+
+            $any_active_meals = Meal::find()->where(['status' => 1])->all();
+            foreach ($any_active_meals as $active_meal) {
+                $active_meal->status = 0;
+                $active_meal->save();
+            }
+
+        }
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -66,13 +80,9 @@ class MealController extends Controller
     {
         $model = new Meal();
 
-        if ($model->load(Yii::$app->request->post()) ){
+        if ($model->load(Yii::$app->request->post())) {
 
-            $last_meal = Meal::find()->where(['status' =>  1])->one();
-            if($last_meal) {
-                $last_meal->status =  0;
-                $last_meal->save();
-            }
+            self::deactivateActiveMeals();
 
             if ($model->save()) {
                 return $this->redirect(['view', 'id' => $model->id]);
@@ -94,11 +104,12 @@ class MealController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            self::deactivateActiveMeals();
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
-
         return $this->render('update', [
             'model' => $model,
         ]);
@@ -110,6 +121,9 @@ class MealController extends Controller
      * @param string $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
+     * @throws \Exception
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($id)
     {

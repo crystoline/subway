@@ -19,7 +19,7 @@ use yii\widgets\ActiveForm;
 
             ]) ?>
             <div class="form-group">
-                <?= Html::submitButton('Start new meal', ['class' => 'btn btn-success']) ?>
+                <?= Html::submitButton('Update meal', ['class' => 'btn btn-success']) ?>
             </div>
         </div>
     </div>
